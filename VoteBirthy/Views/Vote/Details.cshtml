@@ -1,0 +1,131 @@
+@model VoteBirthy.ViewModels.VoteDetailsViewModel
+
+@{
+    ViewData["Title"] = "Vote Details";
+}
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h2>Vote Details</h2>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Birthday Person:</dt>
+                    <dd class="col-sm-8">@Model.BirthdayEmployeeName</dd>
+                    
+                    <dt class="col-sm-4">Started By:</dt>
+                    <dd class="col-sm-8">@Model.StartedByName</dd>
+                    
+                    <dt class="col-sm-4">Start Date:</dt>
+                    <dd class="col-sm-8">@Model.StartDate.ToShortDateString()</dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsClosed)
+                        {
+                            <span class="badge bg-danger">Closed</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                    </dd>
+                    
+                    <dt class="col-sm-4">End Date:</dt>
+                    <dd class="col-sm-8">@(Model.EndDate.HasValue ? Model.EndDate.Value.ToShortDateString() : "Not set")</dd>
+                    
+                    <dt class="col-sm-4">Your Vote:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.HasUserVoted)
+                        {
+                            <span class="badge bg-success">You have voted</span>
+                        }
+                        else if (!Model.IsClosed)
+                        {
+                            <span class="badge bg-warning">You haven't voted yet</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Voting closed</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        
+        @if (Model.IsClosed && Model.WinningOption != null)
+        {
+            <div class="alert alert-success mb-4">
+                <h4 class="alert-heading">Winning Gift:</h4>
+                <p class="mb-0">
+                    <strong>@Model.WinningOption.GiftName</strong> - @Model.WinningOption.GiftDescription
+                    (Total votes: @Model.WinningOption.VoteCount)
+                </p>
+            </div>
+        }
+        
+        <div class="row">
+            @foreach (var option in Model.Options)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 @(Model.HasUserVoted && Model.VotedOptionId == option.VoteOptionId ? "border-success" : "")">
+                        <div class="card-header @(Model.HasUserVoted && Model.VotedOptionId == option.VoteOptionId ? "bg-success text-white" : "")">
+                            <h5 class="card-title mb-0">@option.GiftName</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">@option.GiftDescription</p>
+                            <p class="card-text text-end">
+                                <span class="badge bg-secondary">Votes: @option.VoteCount</span>
+                            </p>
+                            
+                            @if (!Model.IsClosed && !Model.HasUserVoted)
+                            {
+                                <form asp-action="CastVote" method="post" class="mt-3">
+                                    <input type="hidden" name="voteId" value="@Model.VoteId" />
+                                    <input type="hidden" name="optionId" value="@option.VoteOptionId" />
+                                    <button type="submit" class="btn btn-primary w-100">Vote for this gift</button>
+                                </form>
+                            }
+                        </div>
+                        @if (option.VoteCount > 0)
+                        {
+                            <div class="card-footer">
+                                <small class="text-muted">
+                                    <strong>Voters:</strong> @string.Join(", ", option.VoterNames)
+                                </small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+        
+        @if (Model.IsClosed && Model.NonVoterNames != null && Model.NonVoterNames.Any())
+        {
+            <div class="alert alert-warning mt-4">
+                <h5 class="alert-heading">Employees who did not vote:</h5>
+                <p class="mb-0">@string.Join(", ", Model.NonVoterNames)</p>
+            </div>
+        }
+        
+        <div class="text-center mt-4">
+            @if (!Model.IsClosed && Model.CanCloseVote)
+            {
+                <form asp-action="CloseVote" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.VoteId" />
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to close this vote? This action cannot be undone.')">
+                        <i class="bi bi-lock"></i> Close Vote
+                    </button>
+                </form>
+            }
+            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+</div> 

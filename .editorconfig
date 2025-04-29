@@ -1,0 +1,43 @@
+root = true
+
+# All files
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = crlf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# C# files
+[*.cs]
+# Naming conventions
+dotnet_naming_style.underscore_prefix.capitalization = camel_case
+dotnet_naming_style.underscore_prefix.required_prefix = _
+
+# Private fields should have underscore prefix
+dotnet_naming_rule.private_fields_with_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_with_underscore.style = underscore_prefix
+dotnet_naming_rule.private_fields_with_underscore.severity = suggestion
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+# Disable some StyleCop rules
+dotnet_diagnostic.SA1101.severity = none      # Prefix local calls with this
+dotnet_diagnostic.SA1309.severity = none      # Field names should not begin with underscore
+dotnet_diagnostic.SA1633.severity = none      # File should have a header
+dotnet_diagnostic.SA1200.severity = none      # Using directives should be placed correctly
+dotnet_diagnostic.SA1413.severity = none      # Use trailing comma in multi-line initializers
+dotnet_diagnostic.SA1028.severity = none      # Code should not contain trailing whitespace
+dotnet_diagnostic.SA1128.severity = none      # Put constructor initializers on their own line
+
+# Enable var usage
+dotnet_diagnostic.IDE0008.severity = none     # Use explicit type instead of var
+
+# Other style rules
+dotnet_diagnostic.IDE0290.severity = none     # Use primary constructor
+dotnet_diagnostic.IDE0055.severity = none     # Fix formatting
+dotnet_diagnostic.IDE0058.severity = none     # Expression value is never used
+dotnet_diagnostic.CA2007.severity = suggestion # Consider calling ConfigureAwait
+dotnet_diagnostic.CA1848.severity = suggestion # Use LoggerMessage delegates for performance
+dotnet_diagnostic.CA1062.severity = suggestion # Validate arguments are not null 

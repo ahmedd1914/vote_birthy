@@ -1,0 +1,128 @@
+@model VoteBirthy.ViewModels.VoteCreateViewModel
+
+@{
+    ViewData["Title"] = "Create Vote";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h2>Create New Birthday Vote</h2>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post" id="createVoteForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="BirthdayEmpId" class="control-label"></label>
+                        <select asp-for="BirthdayEmpId" asp-items="Model.EmployeeList" class="form-control" id="birthdayEmpSelect">
+                            <option value="">-- Select Birthday Employee --</option>
+                        </select>
+                        <span asp-validation-for="BirthdayEmpId" class="text-danger"></span>
+                    </div>
+                    
+                    <!-- Add hidden field for BirthdayEmpName -->
+                    <input type="hidden" asp-for="BirthdayEmpName" id="birthdayEmpName" />
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="SelectedGiftIds" class="control-label"></label>
+                        <div class="alert alert-info">
+                            Select at least 2 gift options for voting. Hold Ctrl (or Command on Mac) to select multiple options.
+                        </div>
+                        
+                        <!-- Use a regular select for UI, we'll populate the hidden fields via JavaScript -->
+                        <select id="giftSelector" asp-items="Model.GiftList" class="form-select" multiple size="8">
+                        </select>
+                        
+                        <!-- This div will hold our hidden inputs for selected gift IDs -->
+                        <div id="selectedGiftsContainer"></div>
+                        
+                        <span asp-validation-for="SelectedGiftIds" class="text-danger"></span>
+                        <div id="giftSelectionError" class="text-danger" style="display:none;">
+                            Please select at least 2 gifts
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="EndDate" class="control-label"></label>
+                        <input asp-for="EndDate" class="form-control" type="date" />
+                        <span asp-validation-for="EndDate" class="text-danger"></span>
+                        <small class="text-muted">Optional. If not set, the vote will remain open until manually closed.</small>
+                    </div>
+                    
+                    <div class="form-group mt-4">
+                        <button type="button" id="submitBtn" class="btn btn-primary">Create</button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            // When birthday employee dropdown changes
+            $('#birthdayEmpSelect').on('change', function() {
+                // Set the hidden BirthdayEmpName field to the selected text
+                var selectedOption = $(this).find('option:selected');
+                if (selectedOption.val()) {
+                    $('#birthdayEmpName').val(selectedOption.text());
+                } else {
+                    $('#birthdayEmpName').val('');
+                }
+            });
+            
+            // When the submit button is clicked
+            $('#submitBtn').on('click', function () {
+                // Set the BirthdayEmpName if not already set
+                var selectedOption = $('#birthdayEmpSelect').find('option:selected');
+                if (selectedOption.val() && !$('#birthdayEmpName').val()) {
+                    $('#birthdayEmpName').val(selectedOption.text());
+                }
+                
+                // Clear any previous hidden inputs
+                $('#selectedGiftsContainer').empty();
+                
+                // Get selected options
+                var selectedOptions = $('#giftSelector option:selected');
+                console.log('Selected gift count: ' + selectedOptions.length);
+                
+                // Check if at least 2 gifts are selected
+                if (selectedOptions.length < 2) {
+                    $('#giftSelectionError').show();
+                    return;
+                } else {
+                    $('#giftSelectionError').hide();
+                }
+                
+                // Create hidden inputs for each selected gift
+                selectedOptions.each(function(index) {
+                    var giftId = $(this).val();
+                    console.log('Adding gift ID: ' + giftId);
+                    
+                    // Create hidden input for this gift ID
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'SelectedGiftIds',
+                        value: giftId
+                    }).appendTo('#selectedGiftsContainer');
+                });
+                
+                // Log the form data
+                console.log('Form data:');
+                var formData = new FormData(document.getElementById('createVoteForm'));
+                for (var pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+                
+                // Submit the form
+                $('#createVoteForm').submit();
+            });
+        });
+    </script>
+} 

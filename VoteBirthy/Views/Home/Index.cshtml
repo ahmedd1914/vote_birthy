@@ -1,0 +1,132 @@
+﻿@model VoteBirthy.ViewModels.VoteListViewModel
+
+@{
+    ViewData["Title"] = "Birthday Gift Voting";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Birthday Gift Voting</h1>
+    <p>Vote for the best birthday gifts for your colleagues!</p>
+</div>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="text-end mb-3">
+        <a asp-controller="Vote" asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Create New Vote
+        </a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h3>Active Votes</h3>
+        </div>
+        <div class="card-body">
+            @if (Model.ActiveVotes != null && Model.ActiveVotes.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Birthday Person</th>
+                                <th>Started By</th>
+                                <th>Started On</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var vote in Model.ActiveVotes)
+                            {
+                                <tr>
+                                    <td>@vote.BirthdayEmployeeName</td>
+                                    <td>@vote.StartedByName</td>
+                                    <td>@vote.StartDate.ToShortDateString()</td>
+                                    <td>@(vote.EndDate.HasValue ? vote.EndDate.Value.ToShortDateString() : "Not set")</td>
+                                    <td>
+                                        @if (vote.HasUserVoted)
+                                        {
+                                            <span class="badge bg-success">You voted</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Not voted</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-controller="Vote" asp-action="Details" asp-route-id="@vote.VoteId" class="btn btn-sm btn-info">
+                                            <i class="bi bi-info-circle"></i> Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-center">No active votes found.</p>
+            }
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h3>Completed Votes</h3>
+        </div>
+        <div class="card-body">
+            @if (Model.CompletedVotes != null && Model.CompletedVotes.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Birthday Person</th>
+                                <th>Started By</th>
+                                <th>Started On</th>
+                                <th>Ended On</th>
+                                <th>Winning Gift</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var vote in Model.CompletedVotes)
+                            {
+                                <tr>
+                                    <td>@vote.BirthdayEmployeeName</td>
+                                    <td>@vote.StartedByName</td>
+                                    <td>@vote.StartDate.ToShortDateString()</td>
+                                    <td>@(vote.EndDate.HasValue ? vote.EndDate.Value.ToShortDateString() : "Not set")</td>
+                                    <td>@(string.IsNullOrEmpty(vote.WinningGiftName) ? "No votes" : vote.WinningGiftName)</td>
+                                    <td>
+                                        <a asp-controller="Vote" asp-action="Details" asp-route-id="@vote.VoteId" class="btn btn-sm btn-info">
+                                            <i class="bi bi-info-circle"></i> Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-center">No completed votes found.</p>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info mt-4">
+        <h4 class="alert-heading">Welcome to Birthday Gift Voting!</h4>
+        <p>Please log in to view and participate in birthday gift votes.</p>
+        <hr>
+        <p class="mb-0">
+            <a asp-controller="Auth" asp-action="Login" class="btn btn-primary">Log In</a>
+            <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-secondary">Register</a>
+        </p>
+    </div>
+}
